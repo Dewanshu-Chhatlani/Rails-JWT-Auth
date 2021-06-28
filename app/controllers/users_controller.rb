@@ -16,7 +16,9 @@ class UsersController < ApplicationController
 
     if @user && @user.authenticate(user_params[:password])
       token = encode_token({ user_id: @user.id })
-      render json: { user: @user, token: token }
+      response = { user: @user, token: token, avatar: nil }
+      response[:avatar] = rails_blob_url(@user.avatar) if @user&.avatar&.attached?
+      render json: response
     else
       render json: { message: 'Incorrect email or password!' }, status: :unauthorized
     end
@@ -25,6 +27,6 @@ class UsersController < ApplicationController
   private
 
   def user_params
-    params.permit(:email_id, :password)
+    params.permit(:email_id, :password, :avatar)
   end
 end
